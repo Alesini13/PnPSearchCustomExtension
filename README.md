@@ -1,4 +1,4 @@
-# PnP Modern Search - DG Extension
+# PnP Modern Search Custom Extension
 
 This project centralizes extensibility code made by my for the [PnP Modern Search solution (v4)](https://github.com/microsoft-search/pnp-modern-search). This project include:
 
