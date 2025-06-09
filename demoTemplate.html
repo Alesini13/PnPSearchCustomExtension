@@ -1,0 +1,333 @@
+<content id="data-content">
+
+    <style>
+        /* Stili base per il contenitore delle cards, usa flexbox per la responsività */
+        .template--card {
+            flex-grow: 1;
+            flex-shrink: 1;
+            min-width: 130px; /* Larghezza minima per la card */
+            flex-basis: 20%; /* Percentuale di larghezza basata sulla configurazione della web part */
+            margin: 8px; /* Margine tra le cards per creare spazio */
+            box-sizing: border-box; /* Include padding e border nel calcolo della larghezza/altezza */
+        }
+        
+        .template--header {
+            justify-content: center;
+        }
+
+        /* Stili della singola card personalizzata */
+        .custom-card {
+            background-color: {{theme.semanticColors.bodyBackground}}; /* Sfondo basato sul tema di SharePoint */
+            border: 1px solid {{theme.semanticColors.bodyDivider}}; /* Bordo sottile */
+            border-radius: 8px; /* Angoli arrotondati */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Ombra leggera per un effetto "sollevato" */
+            padding: 16px; /* Spazio interno */
+            display: flex;
+            flex-direction: column; /* Elementi interni impilati verticalmente */
+            gap: 10px; /* Spazio tra gli elementi interni della card */
+            height: 100%; /* Assicura che le cards nella stessa riga abbiano altezza consistente */
+            overflow: hidden; /* Nasconde overflow se il contenuto è troppo grande */
+        }
+
+        /* Stili per l'header della card (immagine + titolo/sottotitolo) */
+        .custom-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px; /* Spazio tra immagine e testo */
+        }
+
+        /* Stili per l'immagine del profilo */
+        .pnp-rubrica-profile-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%; /* Rende l'immagine circolare */
+            object-fit: cover; /* Assicura che l'immagine copra l'area senza distorsioni */
+            border: 2px solid #00792c; /* Bordo con colore accentuato del tema */
+        }
+
+        /* Stili per il titolo (nome utente) */
+        .custom-card-title {
+            font-size: 1.2em; /* Dimensione del font */
+            font-weight: 600; /* Grassetto */
+            color: {{theme.semanticColors.bodyText}}; /* Colore del testo basato sul tema */
+            text-decoration: none; /* Rimuove sottolineatura dai link */
+        }
+
+        .custom-card-title:hover {
+            text-decoration: underline; /* Sottolinea al passaggio del mouse */
+        }
+
+        /* Stili per il sottotitolo (JobTitle) */
+        .custom-card-subtitle {
+            font-size: 0.9em;
+            color: {{theme.semanticColors.bodySubtext}}; /* Colore del testo secondario */
+        }
+
+        /* Stili per i dettagli dell'utente */
+        .custom-card-details {
+            font-size: 0.85em;
+            color: {{theme.semanticColors.bodyText}};
+            display: flex;
+            flex-direction: column;
+            gap: 5px; /* Spazio tra le singole righe di dettaglio */
+        }
+
+        .custom-card-details strong {
+            color: {{theme.semanticColors.bodyText}}; /* Colore per le etichette in grassetto */
+        }
+
+        .custom-card-details a {
+            color: {{theme.semanticColors.link}}; /* Colore link basato sul tema */
+            text-decoration: none;
+        }
+
+        .custom-card-details a:hover {
+            text-decoration: underline;
+        }
+        
+        .template--resultCount {
+            color: #507F46;
+            font-weight: bold;
+            font-family: Verdana;
+            font-size: 11px;
+            margin-right: 30px;
+            justify-content: center;
+            display: flex;
+        }
+		
+		.template--resultCount a {
+			color: #507F46;
+			font-weight: normal;
+			font-size: 11px;
+			margin-left: 15px;
+			justify-content: center;
+			display: flex;
+			text-decoration: none;
+		}
+		
+		.template--resultCount a:hover {
+			text-decoration: underline;
+		}
+        
+        .template {
+            width: 80%;
+            margin-left: 10%;
+        }
+        
+        /* Stile per rendere l'icona di Excel verde */
+        msys-results-excel .ms-Button-icon[data-icon-name="ExcelLogo"] {
+            color: #107C10 !important; /* Questo è il verde standard di Excel */
+        }
+        
+        /* Puoi anche personalizzare il testo del link se vuoi */
+        msys-results-excel .ms-Button-label {
+            color: #107C10 !important; /* Rende verde anche il testo del link */
+        }
+
+        /* Media query per la responsività: su schermi piccoli, le cards occupano tutta la larghezza */
+        @media (max-width: 768px) {
+            .template--card {
+                flex-basis: 100%;
+                min-width: unset; /* Rimuove la larghezza minima */
+            }
+        }
+        @media (max-width: 1024px) {
+            .template--card {
+                flex-basis: 30%;
+                min-width: unset; /* Rimuove la larghezza minima */
+                min-width: 200px; /* Larghezza minima per la card */
+            }
+        }
+    </style>
+
+    <div class="template">
+
+        {{!-- Sezione per i filtri selezionati, se abilitata --}}
+        {{#if @root.properties.showSelectedFilters}}
+            <pnp-selectedfilters
+                data-filters="{{JSONstringify filters.selectedFilters 2}}"
+                data-filters-configuration="{{JSONstringify filters.filtersConfiguration 2}}"
+                data-instance-id="{{filters.instanceId}}"
+                data-operator="{{filters.filterOperator}}"
+                data-theme-variant="{{JSONstringify @root.theme}}"
+            >
+            </pnp-selectedfilters>
+        {{/if}}
+
+        <div class="template--header">
+            {{!-- Sezione per il conteggio dei risultati, se abilitata --}}
+            {{#if @root.properties.showResultsCount}}
+                <div class="template--resultCount">
+                    RISULTATI: {{data.totalItemsCount}}
+					<a href="https://sonepar.sharepoint.com/sites/IT_MySacchi/SitePages/RubricaTabella.aspx">Vai a rubrica (tabella)</a>
+                    <msys-results-excel data-label="Download" data-content="{{JSONstringify this 2}}" data-icon="ExcelLogo" labels-list-title="ExcelMapping"></msys-results-excel>
+                </div>
+            {{/if}}
+
+            {{!-- Sezione per l'ordinamento dei risultati --}}
+            <div class="template--sort">
+                <pnp-sortfield
+                    data-fields="{{JSONstringify @root.properties.dataSourceProperties.sortList}}"
+                    data-default-selected-field="{{sort.selectedSortFieldName}}"
+                    data-default-direction="{{sort.selectedSortDirection}}"
+                    data-theme-variant="{{JSONstringify @root.theme}}">
+                </pnp-sortfield>
+            </div>
+        </div>
+
+        {{!-- Contenitore principale delle cards, usa flexbox per disporle --}}
+        <div class="template--cardContainer" style="display: flex; flex-wrap: wrap; justify-content: flex-start;">
+            {{#each data.items as |item|}}
+                <div class="template--card">
+                    <div class="custom-card">
+                        {{!-- Header della card: Immagine e Informazioni principali --}}
+                        <div class="custom-card-header">
+                            <a href="im:sip:{{item.WorkEmail}}" title="Invia messaggio all'utente" style="color: {{@root.theme.semanticColors.link}}"><img src="{{item.PictureURL}}" class="pnp-rubrica-profile-img" alt="Foto di {{item.Title}}" onerror="this.onerror=null;this.src='https://placehold.co/60x60/cccccc/333333?text=No+Img';"/></a>
+                            <div>
+                                <a href="{{slot item @root.slots.PreviewUrl}}" title="Visualizza profilo utente" target="_blank" class="custom-card-title" style="color: {{@root.theme.semanticColors.link}}">{{slot item @root.slots.Title}}</a>
+                                <div class="custom-card-subtitle">{{item.JobTitle}}</div>
+                            </div>
+                        </div>
+
+                        {{!-- Dettagli utente --}}
+                        <div class="custom-card-details">
+                            {{#if item.WorkEmail}}
+                                <div><strong>Email:</strong> <a href="mailto:{{item.WorkEmail}}" title="Invia email all'utente" style="color: {{@root.theme.semanticColors.link}}">{{item.WorkEmail}}</a></div>
+                            {{/if}}
+                            {{#if item.RefinableString107}}
+                                <div><strong>Filiale:</strong> {{item.RefinableString107}}</div>
+                            {{/if}}
+                            {{#if item.Department}}
+                                <div><strong>Dipartimento:</strong> {{item.Department}}</div>
+                            {{/if}}
+                            {{#if item.MobilePhone}}
+                                <div><strong>Cellulare:</strong> {{item.MobilePhone}}</div>
+                            {{/if}}
+                            {{#if item.WorkPhone}}
+                                <div><strong>Telefono Lavoro:</strong> {{item.WorkPhone}}</div>
+                            {{/if}}
+                            {{#if item.ExtensionAttribute4}}
+                                <div><strong>Estensione:</strong> {{item.ExtensionAttribute4}}</div>
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+            {{/each}}
+
+            {{#times @root.properties.layoutProperties.preferedCardNumberPerRow}}
+                <div class="template--card" style="visibility:hidden;height: 0;padding: 0; margin: 8px;"></div>
+            {{/times}}
+        </div>
+
+        {{!-- Sezione per la paginazione, se abilitata --}}
+        {{#if @root.properties.paging.showPaging}}
+            {{#gt @root.data.totalItemsCount @root.properties.paging.itemsCountPerPage}}
+                <pnp-pagination
+                    data-total-items="{{@root.data.totalItemsCount}}"
+                    data-hide-first-last-pages="{{@root.properties.paging.hideFirstLastPages}}"
+                    data-hide-disabled="{{@root.properties.paging.hideDisabled}}"
+                    data-hide-navigation="{{@root.properties.paging.hideNavigation}}"
+                    data-range="{{@root.properties.paging.pagingRange}}"
+                    data-items-count-per-page="{{@root.properties.paging.itemsCountPerPage}}"
+                    data-current-page-number="{{@root.paging.currentPageNumber}}"
+                    data-theme-variant="{{JSONstringify @root.theme}}"
+                >
+                </pnp-pagination>
+            {{/gt}}
+        {{/if}}
+
+    </div>
+
+</content>
+
+<content id="placeholder-content">
+    <style>
+        /* Stili per il placeholder delle cards durante il caricamento */
+        .template--card {
+            flex-grow: 1;
+            flex-shrink: 1;
+            min-width: 206px;
+            flex-basis: {{@root.properties.layoutProperties.columnSizePercentage}}%;
+            margin: 8px; /* Margine corrispondente al layout delle cards reali */
+        }
+
+        /* Stili per la card "shimmer" (effetto di caricamento) */
+        .shimmer-card {
+            background-color: {{theme.semanticColors.bodyBackground}};
+            border: 1px solid {{theme.semanticColors.bodyDivider}};
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 100%;
+            box-sizing: border-box;
+            overflow: hidden; /* Importante per l'animazione shimmer */
+        }
+
+        /* Animazione shimmer */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* Elementi placeholder per l'effetto shimmer */
+        .shimmer-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: {{theme.semanticColors.neutralLight}};
+            animation: shimmer 1.5s infinite linear;
+            background: linear-gradient(to right, {{theme.semanticColors.neutralLight}} 8%, {{theme.semanticColors.neutralQuaternaryAlt}} 18%, {{theme.semanticColors.neutralLight}} 33%);
+            background-size: 200% 100%;
+        }
+
+        .shimmer-line {
+            height: 16px;
+            background-color: {{theme.semanticColors.neutralLight}};
+            border-radius: 4px;
+            animation: shimmer 1.5s infinite linear;
+            background: linear-gradient(to right, {{theme.semanticColors.neutralLight}} 8%, {{theme.semanticColors.neutralQuaternaryAlt}} 18%, {{theme.semanticColors.neutralLight}} 33%);
+            background-size: 200% 100%;
+        }
+
+        .shimmer-line.short { width: 60%; }
+        .shimmer-line.medium { width: 80%; }
+        .shimmer-line.long { width: 100%; }
+    </style>
+
+    <div class="placeholder">
+        {{!-- Placeholder per il conteggio dei risultati --}}
+        <div class="template--resultCount">
+            <span class="shimmer-line short" style="width: 20%"></span>
+        </div>
+        {{!-- Contenitore principale dei placeholder delle cards --}}
+        <div class="template--cardContainer" style="display: flex; flex-wrap: wrap; justify-content: flex-start;">
+            {{#times @root.properties.paging.itemsCountPerPage}}
+                <div class="template--card">
+                    <div class="shimmer-card">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div class="shimmer-circle"></div>
+                            <div style="flex-grow: 1;">
+                                <div class="shimmer-line medium" style="margin-bottom: 8px;"></div>
+                                <div class="shimmer-line short"></div>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div class="shimmer-line long"></div>
+                            <div class="shimmer-line medium"></div>
+                            <div class="shimmer-line short"></div>
+                        </div>
+                    </div>
+                </div>
+            {{/times}}
+
+            {{#times @root.properties.layoutProperties.preferedCardNumberPerRow}}
+                <div class="template--card"
+                    style="visibility:hidden;height: 0;padding: 0; margin: 8px;">
+                </div>
+            {{/times}}
+        </div>
+    </div>
+</content>
